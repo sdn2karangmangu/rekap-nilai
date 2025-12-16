@@ -162,28 +162,52 @@
                     const row = rows[i];
                     if (!row || !row[0]) continue;
                     
+                    // Parse nilai tugas dan ulangan
+                    const tugas1 = parseFloat(row[5]) || 0;
+                    const tugas2 = parseFloat(row[6]) || 0;
+                    const tugas3 = parseFloat(row[7]) || 0;
+                    const tugas4 = parseFloat(row[8]) || 0;
+                    const tugas5 = parseFloat(row[9]) || 0;
+                    
+                    const ulangan1 = parseFloat(row[10]) || 0;
+                    const ulangan2 = parseFloat(row[11]) || 0;
+                    const ulangan3 = parseFloat(row[12]) || 0;
+                    const ulangan4 = parseFloat(row[13]) || 0;
+                    const ulangan5 = parseFloat(row[14]) || 0;
+                    
+                    // Ambil nilai dari spreadsheet
+                    const ratarata_tugas = parseFloat(row[15]) || 0;
+                    const ratarata_ulangan = parseFloat(row[16]) || 0;
+                    const jumlah_ratarata = parseFloat(row[17]) || 0;
+                    const uts = parseFloat(row[18]) || 0;
+                    const uas = parseFloat(row[19]) || 0;
+                    
+                    // Hitung Total Nilai = Rata-rata dari (Ratarata_tugas, Ratarata_ulangan, UTS, UAS)
+                    let total_nilai = parseFloat(row[20]) || 0;
+                    if (!total_nilai || isNaN(total_nilai)) {
+                        const komponenNilai = [ratarata_tugas, ratarata_ulangan, uts, uas].filter(v => v > 0);
+                        if (komponenNilai.length > 0) {
+                            total_nilai = komponenNilai.reduce((a, b) => a + b, 0) / komponenNilai.length;
+                            total_nilai = Math.round(total_nilai * 100) / 100;
+                        } else {
+                            total_nilai = 0;
+                        }
+                    }
+                    
                     students.push({
                         nis: row[0]?.toString() || '',
                         nama: row[1] || '',
                         kelas: row[2] || '',
                         semester: row[3] || '',
                         mapel: row[4] || '',
-                        tugas1: parseFloat(row[5]) || 0,
-                        tugas2: parseFloat(row[6]) || 0,
-                        tugas3: parseFloat(row[7]) || 0,
-                        tugas4: parseFloat(row[8]) || 0,
-                        tugas5: parseFloat(row[9]) || 0,
-                        ulangan1: parseFloat(row[10]) || 0,
-                        ulangan2: parseFloat(row[11]) || 0,
-                        ulangan3: parseFloat(row[12]) || 0,
-                        ulangan4: parseFloat(row[13]) || 0,
-                        ulangan5: parseFloat(row[14]) || 0,
-                        ratarata_ulangan: parseFloat(row[15]) || 0,
-                        ratarata_tugas: parseFloat(row[16]) || 0,
-                          jumlah_ratarata: parseFloat(row[17]) || 0,
-                        uts: parseFloat(row[18]) || 0,
-                        uas: parseFloat(row[19]) || 0,
-                        total_nilai: parseFloat(row[20]) || 0
+                        tugas1, tugas2, tugas3, tugas4, tugas5,
+                        ulangan1, ulangan2, ulangan3, ulangan4, ulangan5,
+                        ratarata_tugas,
+                        ratarata_ulangan,
+                        jumlah_ratarata,
+                        uts,
+                        uas,
+                        total_nilai
                     });
                 }
                 return students;
@@ -226,8 +250,8 @@
             document.getElementById('alertBox').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Memuat data dari spreadsheet...</p></div>';
             
             try {
-                const range = `${sheetName}!A:T`;
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+                const range = `${sheetName}!A:U`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}&valueRenderOption=UNFORMATTED_VALUE`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -384,7 +408,7 @@
                         <div class="total-section" style="margin-top: 0; padding-top: 0; border-top: none;">
                             <div class="total-item total" style="grid-column: span 3;">
                                 <div class="total-label">Total Nilai</div>
-                                <div class="total-value" style="font-size: 32px;">${mapel.total_nilai}</div>
+                                <div class="total-value" style="font-size: 32px;">${Math.round(mapel.total_nilai * 10) / 10}</div>
                             </div>
                         </div>
                     </div>
@@ -403,7 +427,7 @@
                                 <span class="meta-badge">🏫 ${student.kelas}</span>
                                 <span class="meta-badge">📅 ${student.semester}</span>
                                 <span class="meta-badge">📚 ${student.mapels.length} Mata Pelajaran</span>
-                                <span class="meta-badge">📊 Total: ${totalSemuaMapel.toFixed(0)}</span>
+                                <span class="meta-badge">📊 Total: ${totalSemuaMapel.toFixed(1)}</span>
                                 <span class="meta-badge">📈 Rata-rata: ${rataTotalMapel}</span>
                             </div>
                         </div>
@@ -466,5 +490,4 @@
         });
     </script>
 </body>
-
 </html>
