@@ -182,12 +182,11 @@
                     const uts = parseFloat(row[18]) || 0;
                     const uas = parseFloat(row[19]) || 0;
                     
-                    // Hitung Total Nilai = Rata-rata dari (Ratarata_tugas, Ratarata_ulangan, UTS, UAS)
+                    // Formula: Total Nilai = (Jumlah_Ratarata × 0.6) + (UTS × 0.2) + (UAS × 0.2)
                     let total_nilai = parseFloat(row[20]) || 0;
                     if (!total_nilai || isNaN(total_nilai)) {
-                        const komponenNilai = [ratarata_tugas, ratarata_ulangan, uts, uas].filter(v => v > 0);
-                        if (komponenNilai.length > 0) {
-                            total_nilai = komponenNilai.reduce((a, b) => a + b, 0) / komponenNilai.length;
+                        if (jumlah_ratarata > 0 || uts > 0 || uas > 0) {
+                            total_nilai = (jumlah_ratarata * 0.6) + (uts * 0.2) + (uas * 0.2);
                             total_nilai = Math.round(total_nilai * 100) / 100;
                         } else {
                             total_nilai = 0;
@@ -251,7 +250,7 @@
             
             try {
                 const range = `${sheetName}!A:U`;
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}&valueRenderOption=UNFORMATTED_VALUE`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {
